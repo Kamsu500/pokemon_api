@@ -1,4 +1,4 @@
-module.exports.handler = async (event, context) => {
+module.exports.send = async (event, context) => {
   try {
     context.callbackWaitsForEmptyEventLoop = false;
 
