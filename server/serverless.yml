@@ -67,13 +67,6 @@ functions:
           path: /pokemon/create
           method: post
           cors: true
-  get_all:
-    handler: controller/pokemon/get_all_pokemon.get_all
-    timeout: 30 #in seconds
-    events:
-      - http:
-          path: /pokemon/get
-          method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
