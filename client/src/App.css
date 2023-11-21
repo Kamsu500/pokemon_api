@@ -36,3 +36,16 @@
     transform: rotate(360deg);
   }
 }
+
+#card{
+  border-radius: 5%;
+}
+
+.card {
+  transition: transform 0.3s ease; /* Ajoute une transition douce pour la transformation */
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.05); /* Modifie l'échelle de la carte au survol */
+}
