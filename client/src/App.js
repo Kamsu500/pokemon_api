@@ -126,7 +126,9 @@ const App = () => {
                         <hr />
                         <div>
                           {pokemon.types.map((type, i) => (
-                            <span key={i} className="badge bg-primary mx-1">{type}</span>
+                            <span key={i} className="badge bg-primary mx-1">
+                              {type}
+                            </span>
                           ))}
                         </div>
                       </div>
