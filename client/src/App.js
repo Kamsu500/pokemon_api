@@ -3,89 +3,74 @@ import Navbar from "./component/navbar/Navbar";
 import "./App.css";
 
 const App = () => {
-  const [pokemon_data, set_pokemon_ata] = useState([]);
   const [pokemon_species_data, set_pokemon_species_data] = useState([]);
   const [pokemon_details, set_pokemon_details] = useState([]);
   const [loading_details, set_loading_details] = useState(true);
-
-  const api_pokemon_species = "https://pokeapi.co/api/v2/pokemon-species?limit=40"; // limit to 40 for example
+  const url_species_pokemon =
+    "https://pokeapi.co/api/v2/pokemon-species?limit=40";
 
   // fetch species data
   const fetch_pokemon_species_data = useCallback(async () => {
     try {
-      const response = await fetch(api_pokemon_species);
+      const response = await fetch(url_species_pokemon);
       const data = await response.json();
       console.log(data);
       set_pokemon_species_data(data.results);
     } catch (error) {
       console.error("Error fetching Pokemon species data:", error);
     }
-  }, [api_pokemon_species, set_pokemon_species_data]);
-
-  // fetch pokemon data
-  const fetch_pokemon_data = useCallback(async () => {
-    try {
-      const response = await fetch(api_pokemon_species);
-      const data = await response.json();
-      console.log(data);
-      const detailsPromises = data.results.map(async (pokemon) => {
-        const response = await fetch(pokemon.url);
-        return response.json();
-      });
-
-      const details = await Promise.all(detailsPromises);
-      set_pokemon_ata(details);
-    } catch (error) {
-      console.error("Error fetching Pokemon data:", error);
-    }
-  }, [api_pokemon_species, set_pokemon_ata]);
+  }, []);
 
   // fetch details data
-  const fetch_details = useCallback(async () => {
-    const details = await Promise.all(
-      pokemon_species_data.map(async (species) => {
-        try {
-          const response = await fetch(species.url);
-          const species_details = await response.json();
-          console.log(species_details)
-          const description = species_details
-            ? species_details.flavor_text_entries.find(
-                (entry) => entry.language.name === "en"
-              ).flavor_text
-            : "N/A";
-          const height = species_details ? species_details.height : "N/A";
-          const weight = species_details ? species_details.weight : "N/A";
-          const category = species_details
-            ? species_details.genera.find(
-                (genus) => genus.language.name === "en"
-              ).genus
-            : "N/A";
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetch_details = async () => {
+    try {
+      const details_promises = pokemon_species_data.map(async (species) => {
+        const species_esponse = await fetch(species.url);
+        const species_data = await species_esponse.json();
 
-          return {
-            name: species.name,
-            description: description,
-            height: height,
-            weight: weight,
-            category: category,
-          };
-        } catch (error) {
-          console.error("Error fetching Pokemon details:", error);
-          return null;
-        }
-      })
-    );
-    // update a list
-    set_pokemon_details(details.filter((detail) => detail !== null));
-    set_loading_details(false);
-  }, [pokemon_species_data]);
+        const pokemon_response = await fetch(
+          species_data.varieties[0].pokemon.url
+        );
+        const pokemon_data = await pokemon_response.json();
+        const category = species_data.genera.find(
+          (genus) => genus.language.name === "en"
+        ).genus;
+        const abilities = pokemon_data.abilities.map((ability) => {
+          return { ability: ability.ability.name };
+        });
+        const types = pokemon_data.types.map((type) => type.type.name);
+        const sprites_response = await fetch(
+          pokemon_data.sprites.front_default
+        );
+        const sprites_data = await sprites_response.blob();
+        const image_url = URL.createObjectURL(sprites_data);
+
+        return {
+          name: species_data.name,
+          description: species_data.flavor_text_entries.find(
+            (entry) => entry.language.name === "en"
+          ).flavor_text,
+          height: pokemon_data.height,
+          weight: pokemon_data.weight,
+          category: category,
+          abilities: abilities,
+          image_url: image_url,
+          types: types,
+        };
+      });
+
+      const details = await Promise.all(details_promises);
+      set_pokemon_details(details);
+      set_loading_details(false);
+    } catch (error) {
+      console.error("Error fetching Pokemon details:", error);
+    }
+  };
 
   useEffect(() => {
     fetch_pokemon_species_data();
   }, [fetch_pokemon_species_data]);
-
-  useEffect(() => {
-    fetch_pokemon_data();
-  }, [fetch_pokemon_data]);
 
   useEffect(() => {
     if (pokemon_species_data.length > 0) {
@@ -105,17 +90,14 @@ const App = () => {
               <p>Loading...</p>
             ) : (
               pokemon_details.map((pokemon, index) => {
-                const specific_data = pokemon_data.find(
-                  (data) => data.name === pokemon.name
-                );
                 return (
                   <div className="col-sm-6 col-md-3 mb-4" key={index}>
                     <div className="card h-100" id="card">
-                      {specific_data && (
+                      {pokemon.image_url && (
                         <img
-                          src={specific_data.sprites.front_default}
+                          src={pokemon.image_url}
                           className="card-img-top"
-                          alt={specific_data.name}
+                          alt={pokemon.name}
                         />
                       )}
                       <div className="card-body">
@@ -124,17 +106,18 @@ const App = () => {
                         <hr />
                         <div className="row col">
                           <div class="col-lg-6">
-                            Taille : {pokemon_details.height} m
+                            Taille : {pokemon.height} m
                           </div>
                           <div className="col-lg-6">
-                            Talents: {specific_data.abilities.map((ability, i) => (
-                              <span key={i}>{ability.ability.name}</span>
+                            Talents:{" "}
+                            {pokemon.abilities.map((ability, i) => (
+                              <span key={i}>{ability.ability}</span>
                             ))}
                           </div>
                         </div>
                         <div className="row col">
                           <div class="col-lg-6">
-                            Poids : {specific_data.weight} kg
+                            Poids : {pokemon.weight} kg
                           </div>
                           <div class="col-lg-6">
                             category : {pokemon.category}
@@ -142,10 +125,8 @@ const App = () => {
                         </div>
                         <hr />
                         <div>
-                          {specific_data.types.map((type, i) => (
-                            <span key={i} className="badge bg-primary mx-1">
-                              {type.type.name}
-                            </span>
+                          {pokemon.types.map((type, i) => (
+                            <span key={i} className="badge bg-primary mx-1">{type}</span>
                           ))}
                         </div>
                       </div>
