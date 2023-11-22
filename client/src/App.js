@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import Navbar from "./component/navbar/Navbar";
 import "./App.css";
 
-const App = () => {
+function App() {
   const [pokemon_species_data, set_pokemon_species_data] = useState([]);
   const [pokemon_details, set_pokemon_details] = useState([]);
   const [loading_details, set_loading_details] = useState(true);
+
   const url_species_pokemon =
     "https://pokeapi.co/api/v2/pokemon-species?limit=40";
 
@@ -26,36 +27,47 @@ const App = () => {
   const fetch_details = async () => {
     try {
       const details_promises = pokemon_species_data.map(async (species) => {
-        const species_esponse = await fetch(species.url);
-        const species_data = await species_esponse.json();
+        const species_response = await fetch(species.url);
+
+        const species_data = await species_response.json();
+        console.log(species_data);
 
         const pokemon_response = await fetch(
           species_data.varieties[0].pokemon.url
         );
+
         const pokemon_data = await pokemon_response.json();
+        console.log(pokemon_data);
+
         const category = species_data.genera.find(
           (genus) => genus.language.name === "en"
         ).genus;
+
+        const description = species_data.flavor_text_entries.find(
+          (entry) => entry.language.name === "en"
+        ).flavor_text;
+
         const abilities = pokemon_data.abilities.map((ability) => {
           return { ability: ability.ability.name };
         });
+
         const types = pokemon_data.types.map((type) => type.type.name);
-        const sprites_response = await fetch(
-          pokemon_data.sprites.front_default
+
+        /* const sprites_response = await fetch(
+          pokemon_data.sprites.back_default
         );
+
         const sprites_data = await sprites_response.blob();
-        const image_url = URL.createObjectURL(sprites_data);
+        const image_url = URL.createObjectURL(sprites_data); */
 
         return {
           name: species_data.name,
-          description: species_data.flavor_text_entries.find(
-            (entry) => entry.language.name === "en"
-          ).flavor_text,
+          description: description,
           height: pokemon_data.height,
           weight: pokemon_data.weight,
           category: category,
           abilities: abilities,
-          image_url: image_url,
+          // image_url: image_url,
           types: types,
         };
       });
@@ -106,10 +118,10 @@ const App = () => {
                         <hr />
                         <div className="row col">
                           <div class="col-lg-6">
-                            Taille : {pokemon.height} m
+                            Height : {pokemon.height} m
                           </div>
                           <div className="col-lg-6">
-                            Talents:{" "}
+                            Talents :{" "}
                             {pokemon.abilities.map((ability, i) => (
                               <span key={i}>{ability.ability}</span>
                             ))}
@@ -117,10 +129,10 @@ const App = () => {
                         </div>
                         <div className="row col">
                           <div class="col-lg-6">
-                            Poids : {pokemon.weight} kg
+                            Weight : {pokemon.weight} kg
                           </div>
                           <div class="col-lg-6">
-                            category : {pokemon.category}
+                            Category : {pokemon.category}
                           </div>
                         </div>
                         <hr />
@@ -142,6 +154,6 @@ const App = () => {
       </body>
     </>
   );
-};
+}
 
 export default App;
