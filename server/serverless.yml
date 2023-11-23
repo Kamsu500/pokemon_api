@@ -59,13 +59,13 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  send:
-    handler: controller/pokemon/send_pokemon.send
+  send_pokemon_to_hubspot:
+    handler: controller/pokemon/send_pokemon.send_pokemon_to_hubspot
     timeout: 30 #in seconds
     events:
       - http:
           path: /pokemon/create
-          method: post
+          method: get
           cors: true
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

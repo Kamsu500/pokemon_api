@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./component/navbar/Navbar";
 import "./App.css";
 
@@ -11,7 +11,8 @@ function App() {
     "https://pokeapi.co/api/v2/pokemon-species?limit=40";
 
   // fetch species data
-  const fetch_pokemon_species_data = useCallback(async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetch_pokemon_species_data = async () => {
     try {
       const response = await fetch(url_species_pokemon);
       const data = await response.json();
@@ -20,7 +21,7 @@ function App() {
     } catch (error) {
       console.error("Error fetching Pokemon species data:", error);
     }
-  }, []);
+  };
 
   // fetch details data
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,7 +93,7 @@ function App() {
 
   return (
     <>
-      <body className="bg-danger">
+      <body id="body">
         <div className="h-25">
           <Navbar />
         </div>

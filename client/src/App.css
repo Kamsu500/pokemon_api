@@ -49,3 +49,7 @@
 .card:hover {
   transform: scale(1.05); /* Modifie l'échelle de la carte au survol */
 }
+
+#body{
+  background-color: #c05050;
+}

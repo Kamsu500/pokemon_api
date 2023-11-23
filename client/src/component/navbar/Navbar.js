@@ -6,9 +6,14 @@ function Navbar() {
   const hande_submit = async (e) => {
     e.preventDefault();
 
+    const HUBSPOT_SECRET_KEY = "d86d58bf-bad5-457f-9edd-92afeedd4886";
+
     return fetch("http://localhost:3000/dev/pokemon/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: HUBSPOT_SECRET_KEY,
+      },
     })
       .then((response) => {
         console.log(response);

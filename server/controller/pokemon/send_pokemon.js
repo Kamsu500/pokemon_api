@@ -1,53 +1,50 @@
-module.exports.send = async (event, context) => {
+const HUBSPOT_API_KEY = "pat-eu1-e9abd65a-dcbf-411c-89cc-f98e808facb5";
+
+module.exports.send_pokemon_to_hubspot = async () => {
   try {
-    context.callbackWaitsForEmptyEventLoop = false;
-
-    // retrieve data from PokeAPI
-
     const response = await fetch(
       "https://pokeapi.co/api/v2/pokemon-species?limit=40"
     );
     const pokemon_data = await response.json();
-    console.log(pokemon_data);
+    const pokemon_list = pokemon_data.results;
 
-    // get all json pokemon
+    // Format the Pokémon data into contacts for HubSpot
+    const contacts = pokemon_list.map((pokemon) => ({
+      properties: [
+        { property: "name", value: pokemon.name },
+        { property: "weight", value: pokemon.weight },
+        { property: "height", value: pokemon.height },
 
-    if (pokemon_species.results) {
-      var x = pokemon_species.results.forEach(async (pokemon) => {
-        const pokemon_response = await fetch(pokemon.url);
-        return await pokemon_response.json();
-      });
-    }
+      ],
+    }));
 
-    // send data to hubspot
+    // Send contacts to HubSpot
+    const hub_spot_responses = await Promise.all(
+      contacts.map((contact) =>
+        fetch(
+          `https://api.hubapi.com/contacts/v1/lists/all/contacts/all?hapikey=${HUBSPOT_API_KEY}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": HUBSPOT_API_KEY
+            },
+            body: JSON.stringify(contact),
+          }
+        ).then((res) => res.json())
+      )
+    );
 
-    const hub_spot_response = await fetch("https://api.hubspot.com/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(x),
-    });
+    console.log(hub_spot_responses);
 
-    // check HubSpot response and resend appropriate message
-
-    if (hub_spot_response.ok) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          message: "Data have been saved successfully in HubSpot",
-        }),
-      };
-    } else {
-      return {
-        statusCode: hub_spot_response.status,
-        body: JSON.stringify({ message: "An error has occured" }),
-      };
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify(hub_spot_responses),
+    };
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: "An error has occured" }),
+      body: JSON.stringify({ error: error.message }),
     };
   }
 };
