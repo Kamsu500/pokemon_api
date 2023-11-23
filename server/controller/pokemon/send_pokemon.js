@@ -1,6 +1,6 @@
 const HUBSPOT_API_KEY = "pat-eu1-e9abd65a-dcbf-411c-89cc-f98e808facb5";
 
-module.exports.send_pokemon_to_hubspot = async () => {
+module.exports.send_pokemon_to_hubspot = async (event) => {
   try {
     const response = await fetch(
       "https://pokeapi.co/api/v2/pokemon-species?limit=40"
@@ -22,7 +22,7 @@ module.exports.send_pokemon_to_hubspot = async () => {
     const hub_spot_responses = await Promise.all(
       contacts.map((contact) =>
         fetch(
-          `https://api.hubapi.com/contacts/v1/lists/all/contacts/all?hapikey=${HUBSPOT_API_KEY}`,
+          `https://api.hubapi.com/crm/v3/objects/contacts`,
           {
             method: "POST",
             headers: {

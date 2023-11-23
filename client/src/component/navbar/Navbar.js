@@ -6,27 +6,26 @@ function Navbar() {
   const hande_submit = async (e) => {
     e.preventDefault();
 
-    const HUBSPOT_SECRET_KEY = "d86d58bf-bad5-457f-9edd-92afeedd4886";
-
-    return fetch("http://localhost:3000/dev/pokemon/create", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: HUBSPOT_SECRET_KEY,
-      },
-    })
-      .then((response) => {
-        console.log(response);
-        if (response.ok) {
-          console.log("json HubSpot has been saved");
-        } else {
-          console.log("failed");
+    try {
+      const response1 = await fetch(
+        "http://localhost:3000/dev/pokemon/create",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
         }
-      })
-      .catch(function (error) {
-        console.log("error", error);
-      });
+      );
+
+      if (response1.ok) {
+        const data = await response1.json();
+        console.log(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
+  
   return (
     <>
       <nav class="navbar navbar-expand-lg w-100" id="navbarcolor">
